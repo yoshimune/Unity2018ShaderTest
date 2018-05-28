@@ -8,6 +8,6 @@ public class CameraRotation : MonoBehaviour {
     
     private void FixedUpdate()
     {
-        transform.Rotate(speed);
+        transform.Rotate(speed, Space.World);
     }
 }

@@ -1,84 +1,104 @@
-﻿Shader "Custom/Butterfly" {
-	Properties {
+﻿Shader "Custom/Butterfly"
+{
+	Properties
+	{
+		_MainTex ("Texture", 2D) = "white" {}
 		[HDR]
 		_Color("Color", Color) = (1,1,1,1)
+		[HDR]
 		_ColorZ("ColorZ", Color) = (1,1,1,1)
-		_Z("Z", Range(1,1000)) = 1
-		_MainTex ("Albedo (RGB)", 2D) = "white" {}
-		_Glossiness ("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metallic", Range(0,1)) = 0.0
-		_AlphaCutoff ("AlphaCutoff", Range(0,1)) = 0.3
+		_Z("Z", Range(0.001,10)) = 1
 		_Speed("Speed", Range(0,20)) = 1.0
-		_Offset("Offset", Range(0,1)) = 1.0
+		_Offset("Offset", Range(0,0.03125)) = 0.001
 		_OffsetRotate("OffsetRotate", Range(0,3.14)) = 1.0
+		_Cutoff ("Alpha Cut off", Range(0,1)) = 0.3
 	}
-	SubShader {
-		Tags { "RenderType"="Opaque" "DisableBatching" = "True" }
-		Cull Off
-		LOD 200
+	SubShader
+	{
+		Tags { "Queue"="AlphaTest" "RenderType"="TransparentCutout" }
+		LOD 100
 
-		CGPROGRAM
-		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard vertex:vert alphatest:_AlphaCutoff
-//#pragma multi_compile_instancing
-//#pragma instancing_options procedural:vertInstancingSetup
-//#pragma exclude_renderers gles
-#include "UnityStandardParticleInstancing.cginc"
-#include "UnityCG.cginc"
-		// Use shader model 3.0 target, to get nicer looking lighting
-		#pragma target 3.0
+		Pass
+		{
+			Tags { "LightMode"="ForwardBase" }
+			Cull Off
 
-		sampler2D _MainTex;
-		sampler2D _CameraDepthTexture;
-
-		struct Input {
-			float2 uv_MainTex;
-			float2 uv_CameraDepthTexture;
-			fixed4 vertexColor;
-			float3 worldPos;
-		};
-
-		half _Glossiness;
-		half _Metallic;
-		fixed4 _Color;
-		fixed4 _ColorZ;
-		float _Speed;
-		float _Offset;
-		float _Z;
-
-		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-		// #pragma instancing_options assumeuniformscaling
-		UNITY_INSTANCING_BUFFER_START(Props)
-		UNITY_DEFINE_INSTANCED_PROP(float, _OffsetRotate)
-			// put more per-instance properties here
-		UNITY_INSTANCING_BUFFER_END(Props)
-
-		void vert(inout appdata_full v, out Input o) {
-			float offset = UNITY_ACCESS_INSTANCED_PROP(Props, _OffsetRotate);
-			float theta = (((step(v.vertex.x, 0) * 2) - 1) * sin((_Time.y * _Speed + offset)));
-			float2x2 rotation = float2x2(cos(theta), -sin(theta), sin(theta), cos(theta));
-			float2 xz = mul(rotation, v.vertex.xz) + float2(0, sin(_Time.y * _Speed) * _Offset + offset);
-			v.vertex.xyz = float3(xz.x, v.vertex.y, xz.y);
-
-			UNITY_INITIALIZE_OUTPUT(Input, o);
-			//vertInstancingColor(o.vertexColor);
-			//vertInstancingUVs(v.texcoord, o.uv_MainTex);
-		}
-
-		void surf (Input IN, inout SurfaceOutputStandard o) {
+			CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+#pragma multi_compile_instancing
 			
-			// デプス
-			float depth = saturate(length(_WorldSpaceCameraPos.xyz - IN.worldPos) / _Z);
-			fixed3 zcolor = fixed3(1, 1, 1) - depth * (fixed3(1, 1, 1) - _ColorZ.rgb);
-			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color * (fixed4(zcolor, 1));
-			o.Albedo = c.rgb;
-			o.Emission = c.rgb;
-			o.Metallic = _Metallic;
-			o.Smoothness = _Glossiness;
-			o.Alpha = c.a;
+			#include "UnityCG.cginc"
+
+			struct appdata
+			{
+				float4 vertex : POSITION;
+				float2 uv : TEXCOORD0;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			struct v2f
+			{
+				float2 uv : TEXCOORD0;
+				float4 vertex : SV_POSITION;
+				float3 worldPos : TEXCOORD1;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+
+			UNITY_INSTANCING_BUFFER_START(Props)
+			UNITY_DEFINE_INSTANCED_PROP(float, _OffsetRotate)
+			UNITY_INSTANCING_BUFFER_END(Props)
+
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
+
+			fixed4 _Color;
+			fixed4 _ColorZ;
+			float _Speed;
+			float _Offset;
+			float _Z;
+			//float _OffsetRotate;
+
+			float _Cutoff;
+
+			v2f vert (appdata v)
+			{
+				v2f o;
+
+				UNITY_SETUP_INSTANCE_ID(v);
+				//UNITY_TRANSFER_INSTANCE_ID(v, o); // necessary only if you want to access instanced properties in the fragment Shader.
+				float offset = UNITY_ACCESS_INSTANCED_PROP(Props, _OffsetRotate);
+				
+				// ローカル座標で羽ばたきアニメーションする
+				// x座標が0未満の場合は-1,0以上の場合は1を乗算して回転方向を逆にしている
+				float theta = (((step(v.vertex.x, 0) * 2) - 1) * sin((_Time.y * _Speed + offset)));
+				float2x2 rotation = float2x2(cos(theta), -sin(theta), sin(theta), cos(theta));
+				float2 xz = mul(rotation, v.vertex.xz) + float2(0, sin(_Time.y * _Speed + offset) * _Offset);
+				float4 vpos = float4(xz.x, v.vertex.y, xz.y, 1);
+
+				o.vertex = UnityObjectToClipPos(vpos);
+				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
+				o.worldPos = mul(unity_ObjectToWorld, vpos);
+				return o;
+			}
+			
+			half4 frag (v2f i) : SV_Target
+			{
+				//UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.
+
+				// デプス
+				float depth = saturate(length(_WorldSpaceCameraPos.xyz - i.worldPos.xyz) / _Z);
+				half4 texColor = tex2D(_MainTex, i.uv);
+				half4 mainColor = texColor * _Color;
+				half4 zColor = texColor * _ColorZ;
+				half4 col;
+				col.rgb = mainColor.rgb + (depth * (zColor.rgb - mainColor.rgb));
+				col.a = mainColor.a;
+				clip(col.a - _Cutoff);
+				return col;
+			}
+			ENDCG
 		}
-		ENDCG
 	}
-	FallBack "Diffuse"
 }
