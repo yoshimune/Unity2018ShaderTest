@@ -65,17 +65,17 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _Offset: 0.0044
+    - _Offset: 0.0079
     - _OffsetRotate: 2.34
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 18.47
+    - _Speed: 8.5
     - _SrcBlend: 1
     - _UVSec: 0
-    - _Z: 7.12
+    - _Z: 3.3
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0, g: 4.78613, b: 2.581002, a: 1}
-    - _ColorZ: {r: 0, g: 0.5591951, b: 20.466541, a: 1}
+    - _Color: {r: 0, g: 2.9960785, b: 1.6156863, a: 1}
+    - _ColorZ: {r: 0, g: 0.321464, b: 10.233271, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

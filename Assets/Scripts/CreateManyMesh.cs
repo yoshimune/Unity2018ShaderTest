@@ -5,7 +5,7 @@ using UnityEngine;
 public class CreateManyMesh : MonoBehaviour {
 
     [SerializeField]
-    int count;
+    public int count;
 
     [SerializeField]
     float range = 10.0f;
@@ -92,12 +92,12 @@ public class CreateManyMesh : MonoBehaviour {
 
         for (int i = 0; i < count; i++)
         {
-            //Vector3 pos = posList[i] + (Vector3.up * Time.deltaTime * speed);
-            //if (pos.y > range*0.5f) { pos = new Vector3(pos.x, range * -0.5f, pos.z); }
-            //posList[i] = pos;
+            Vector3 pos = posList[i] + (Vector3.up * Time.deltaTime * speed);
+            if (pos.y > range * 0.5f) { pos = new Vector3(pos.x, range * -0.5f, pos.z); }
+            posList[i] = pos;
             prop.SetFloat("_OffsetRotate", (0));
-            Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, material, 0, null, 0, prop);
-            //Graphics.DrawMesh(mesh, posList[i], Quaternion.Euler(rotList[i].x, rotList[i].y, rotList[i].z), mat, 0, null, 0, prop);
+            //Graphics.DrawMesh(mesh, Vector3.zero, Quaternion.identity, material, 0, null, 0, prop);
+            Graphics.DrawMesh(mesh, posList[i], Quaternion.Euler(rotList[i].x, rotList[i].y, rotList[i].z), material, 0, null, 0, prop);
         }
 
     }

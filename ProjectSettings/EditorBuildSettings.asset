@@ -5,7 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 0
+    path: Assets/Scenes/BatterFly.unity
+    guid: 6d52492919b8bc64e8e40eebdc8ac75a
+  - enabled: 1
+    path: Assets/Scenes/BatterFly_DrawMesh.unity
+    guid: 85a6486e9db98844990dd36f37d791d9
   m_configObjects: {}

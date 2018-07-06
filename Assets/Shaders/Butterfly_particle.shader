@@ -24,11 +24,12 @@
 			Cull Off
 
 			CGPROGRAM
+		//#pragma target 4.0
 			#pragma vertex vert
 			#pragma fragment frag
 #pragma multi_compile_instancing
 #pragma instancing_options procedural:vertInstancingSetup
-			
+
 			#include "UnityCG.cginc"
 #include "UnityStandardParticleInstancing.cginc"
 
@@ -71,7 +72,7 @@
 				//UNITY_TRANSFER_INSTANCE_ID(v, o); // necessary only if you want to access instanced properties in the fragment Shader.
 				//float offset = UNITY_ACCESS_INSTANCED_PROP(Props, _OffsetRotate);
 				float offset = _OffsetRotate;
-				
+
 				// ローカル座標で羽ばたきアニメーションする
 				// x座標が0未満の場合は-1,0以上の場合は1を乗算して回転方向を逆にしている
 				float theta = (((step(v.vertex.x, 0) * 2) - 1) * sin((_Time.y * _Speed + offset)));
@@ -85,7 +86,7 @@
 				o.worldPos = mul(unity_ObjectToWorld, vpos);
 				return o;
 			}
-			
+
 			half4 frag (v2f i) : SV_Target
 			{
 				//UNITY_SETUP_INSTANCE_ID(i); // necessary only if any instanced properties are going to be accessed in the fragment Shader.

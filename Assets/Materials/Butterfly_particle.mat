@@ -74,7 +74,7 @@ Material:
     - _Speed: 12.85
     - _SrcBlend: 1
     - _UVSec: 0
-    - _Z: 3.46
+    - _Z: 4.31
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.96335065, g: 4.6910987, b: 3.8534026, a: 1}
